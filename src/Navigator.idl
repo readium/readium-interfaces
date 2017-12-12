@@ -1,0 +1,1414 @@
+/** 
+ * @defgroup Navigator
+ * @brief Responsible for displaying and providing navigation for publication resources.
+ * 
+ * The navigator is a module that directly interacts with the @ref Streamer, either by:
+ * - Using the in-memory model produced by the streamer.
+ * - Or by fetching in HTTP the JSON manifest.
+ * 
+ * The navigator is responsible for a number of things:
+ * - It is responsible for displaying the resources contained in the spine of the publication.
+ * - It can also be responsible for navigating between resources
+ *   (either by following the spine or displaying anciliary resources)
+ * - In some implementations, the navigator module may also 
+ *   be responsible for injecting CSS/JS in a resource.
+ */
+ 
+/**
+ * @addtogroup Navigator
+ * @{
+ */
+
+interface StreamerClient {
+
+
+    Publication openPublication(string epubUrl);
+
+};
+
+/**
+ * @brief Provides information about the current device as well as setting
+ * device parameters, if supported
+ * 
+ */
+[Constructor( Object config )]
+interface ReadingSystem {
+
+    /**
+     * The constructor for the ReadingSystem object
+     * The constructor for the ReadingSystem interface allows a ReadingSystem
+     * object to be created.  The parameter is a JavaScript object of the form:
+     *
+     * 
+     \code
+     *   var config = {};
+     *   config["margin"] = "1em";
+     *   config["line-height"] = "16pt";
+     *     etc.
+     \endcode
+     *  
+     * @param config   the JavaScript object that holds the configuration options
+     */
+    ReadingSystem ( Object config );
+
+    /**
+     * Initialize the renderer by passing in the div within which the 
+     * renderer should inject its own rendering machinery (e.g. nested 
+     * iframes or similar)
+     *
+     * There can only be one call to this method per document.
+     * 
+     * @param div   the top-level div within which the document will be rendered
+     */
+    void initRenderer ( Object div );
+
+    /**
+     * Basic method to open an EPUB.  Also performs any other initialization required.
+     *  
+     * TODO Needs to be asynchronous using Promises
+     *      
+     * @param publication   the publication to open
+     *
+     * @return an object that implements the Rendition interface.  Null if failed
+     */
+    Rendition openRendition ( Publication publication );
+
+
+
+    /**
+     * Get the name of the device (e.g browser or device)
+     * 
+     * @return the name of the device (if any) 
+     */
+    string getName();
+
+    /**
+     * Returns a JSON object that has the size of the device, if available
+     * 
+     * @return JSON array with the size of the device as { "width":num, "height":num } 
+     */
+    Object getDeviceSize();
+
+    /**
+     * Provides method of injecting user stylesheet document-level styling
+     * 
+     * @param url   the url to the stylesheet to be injected
+     * 
+     * @return false if not supported
+     */
+    bool injectStyleSheet ( string url );
+
+    /**
+     * Inect a user-agent style sheet 
+     * 
+     * @return true if successful else false 
+     */
+    bool injectUAStyleSheet();
+
+    /**
+     * Provides a method for injecting a JavaScript library into the 
+     * ReadingSystem at runtime.
+     * 
+     * @param url   the url to the JavaScript to be injected
+     * 
+     * @return false if not supported
+     */
+    bool injectJavaScript ( string url );
+
+    /**
+     * Get the ReadingSystemObject
+     * 
+     * @return returns an object which implements the ReadingSystemObject interface
+     */
+    Object getRSO();
+ };
+
+/**
+ * @brief The fundamental interface for the Readium implementation.  Represents the current 
+ * open EPUB rendition.  Provides access to the rendition's parsed publication and its contents 
+ * as well as rendering, etc.  In addition, it provides access to the underlying 
+ * rendering and navigation engine (typically a browser engine).
+ * 
+ */
+interface Rendition {
+
+    /**
+     * Return the parsed OPF package (or equivalent) for the rendition
+     * 
+     * @return an instance of the Publication model brought from the Streamer 
+     */
+    Publication getPublication();
+
+    Spine getSpine();
+
+    /**
+     * Returns the root item of the error list. This is presumably a tree or list, 
+     * but the item should be a normal tree item in behaviour even if the set of
+     * errors is a flat list.
+     * 
+     * @return an object that implements the ErrorItem interface
+     */
+    ErrorItem getErrorRoot();
+
+    /**
+     * Clear the current error list.
+     */
+    void clearErrorList();
+   
+
+};
+
+
+interface Spine {
+    SpineItem[] items;
+
+    SpineItem getFirst();
+    SpineItem getLast();
+
+
+};
+
+
+/**
+ * @brief Provides methods to navigate the document as well as converting between
+ * Location, screen and document position.
+ * 
+ */
+interface Navigator {
+
+    /**
+     * Navigate such that the specified location is at the top left of the 
+     * displayed screen (if ltr doc, else top right).
+     *
+     * @param loc   the location to navigate to 
+     */
+    void gotoLocation ( Location loc );
+
+    /**
+     * Returns the current location in the current spine item.  If no selection
+     * then it returns the top-left (or top-right if r-t-l document) of the current 
+     * screen
+     * 
+     * @return the CFI that represents the current location 
+     */
+    Location getCurrentLocation();
+
+    /**
+     * Returns the most recent location before the current location.
+     * This is essentially a FILO stack as each navigation action 
+     * (e.g. nextScreen, gotoDocEnd, etc.) pushes the previous 
+     * "current" location onto the stack 
+     *
+     * QUESTION: Should simple page turns be saved?  Or only higher 
+     * level actions such as gotoLocation, gotoEnd, etc.?
+     * 
+     * @return a Location that represents the previous location 
+     */
+    Location getPreviousLocation();
+
+    /**
+     * Navigate to the next renderable screen in the document, if any
+     *
+     * Note that this takes into account the page-direction of the document
+     */
+    void nextScreen();
+
+    /**
+     * Navigate to the previous renderable screen in the document, if any
+     *
+     * Note that this takes into account the page-direction of the document
+     */
+    void previousScreen();
+
+    /**
+     * Returns, as accurately as possible, the location of the top left (for 
+     * ltr doc) or top-right location (for rtl docs) of the current screen
+     *
+     * @return a Location that represents the "beginning" of the current screen 
+     */
+    Location getScreenBegin();
+
+    /**
+     * Returns, as accurately as possible, the location of the lower right (for 
+     * ltr doc) or lower-left location (for rtl docs) of the current screen
+     *
+     * @return a Location that represents the "end" of the current screen
+     */
+    Location getScreenEnd();
+
+    /**
+     * Returns, as accurately as possible, the location of the top left (for 
+     * ltr doc) or top-right location (for rtl docs) of the first screen in the doc
+     *
+     * @return a Location that represents the "beginning" of the current document  
+     */
+    Location getDocBegin();
+
+    /**
+     * Returns, as accurately as possible, the location of the lower right (for 
+     * ltr doc) or lower-left location (for rtl docs) of the last screen in the doc
+     *
+     * @return a Location that represents the "end" of the current document 
+     */
+    Location getDocEnd();
+
+    /**
+     * Returns true if the current screen is the first screen in the document
+     * 
+     * @return true if the first screen, else false 
+     */
+    bool isFirstScreen();
+
+    /**
+     * Returns true if the current screen is the last one in the document (.
+     * 
+     * @return true if the last screen, else false 
+     */
+    bool isFinalScreen();
+
+    /**
+     * Returns true if the current screen is the first screen in the current
+     * spine item (for reflowable spine items).  Always returns true for fixed 
+     * layout spine items.
+     * 
+     * @return true if it is the first screen else false 
+     */
+    bool isFirstScreenSpine();
+
+    /**
+     * Returns true if the current screen is the last one in the spine item (for
+     * reflowable documents).  Always returns true for fixed layout spine items.
+     * 
+     * @return true if the last screen else false 
+     */
+    bool isFinalScreenSpine();
+
+    /**
+     * Returns the total number of screens in the current spine item (for reflowable 
+     * documents).  Always returns 1 for fixed layout spine items.
+     *
+     * TODO: Implement with Promises
+     * 
+     * @return number of screens in this spine item 
+     */
+    int getScreenCountSpine();
+
+    /**
+     * Returns the total number of screens in the document (for reflowable documents)
+     * or the total number of pages (for fixed layout documents).
+     *
+     * TODO  Implement with Promises
+     *
+     * @return count  the count of pages
+     *  
+     */
+    void getScreenCount();
+
+    /**
+     * Navigates to the specified screen (for reflowable) or page (for fixed
+     * layout).  Note that the first screen in the document would be screen 0
+     * 
+     * TODO  Implement with Promises
+     *
+     * @param screenNum   0-based index of the screen to navigate to 
+     */
+    void gotoScreen ( int screenNum );
+
+    /**
+     * Returns the screen (or page) number for the specified location in the 
+     * document
+     *
+     * TODO  Implement with Promises
+     *
+     * @param loc        the location whose screen is to be determined 
+     * 
+     * @return the 0-based index of the screen which contains the location
+     */
+    int getScreenFromLocation ( Location loc );
+
+    /**
+     * Return the location of the upper-left (ltr documents) or upper-right (for rtl 
+     * documents) of the specified screen.
+     * 
+     * TODO  Implement with Promises
+     *
+     * @param screen  the number of the screen
+     * 
+     * @return the location for the specified screen
+     */
+    Location getLocationFromScreen ( int screen );
+
+    /**
+     * Get the spine item that contains the specified Location
+     * 
+     * @return an object that implements the SpineItem interface 
+     */
+    Object getSpineItemFromLocation();
+
+    /**
+     * Returns a JSON object that has the bounding box enclosed by the start
+     * Location (if a range) or the two Locations
+     *
+     * The bbox is returned as the x and y coordinate and the height and width
+     * of the box. All values in pixels with the origin of the coordinate system 
+     * in the upper left of the current screen
+     * 
+     * @param start   the starting location for the bounding box 
+     * @param end     the end location for the bounding box 
+     * 
+     * @return  a JSON object of the form <c>{ "x":num, "y":num, "width":num, "height":num }</c>
+     */
+    Object getBoundingBox ( Location start, Location end );
+};
+
+
+/// Container for the user's display area of the book rendering
+interface Viewport {
+
+    void setView(View view);
+    View getView();
+
+    void renderView();
+
+    /**
+     * Returns the current zoom level for the current screen
+     *  
+     * @return the current zoom factor 
+     */
+    float getZoom();
+
+    /**
+     * Sets the current zoom level for the page
+     * 
+     * @param zoom   the desired zoom factor
+     */
+    void setZoom( float zoom );
+};
+
+/// View that displays, lays out and places sub-views that render book content
+interface LayoutView : View {
+
+    View[] getViews();
+
+    View pop();
+    int push(View view);
+    View shift();
+    int unshift(View view);
+
+    View[] getViewsInDisplay();
+
+    void displayView(View view, int displayIndex);
+
+    void setDisplayCount(int displayCount);
+    int getDisplayCount();
+
+    void addViewDisplayedHandler(function callback);
+    void onViewDisplayed(View view, int displayIndex);
+
+    void addViewConcealedHandler(function callback);
+    void onViewConcealed(View view, int displayIndex);
+};
+
+interface ScrollLayoutView : LayoutView {
+
+    bool isVertical;
+
+    void setOrientation(bool isVertical);
+
+    void setScrollOffset(int offset);
+    int getScrollOffset();
+
+    void displayOffsetView(View view, int relativeOffset);
+};
+
+interface View {
+
+    View parent;
+
+    void render();
+    void destroy();
+
+    const int PAGE_BOUNDARY_NONE   = 0;
+    const int PAGE_BOUNDARY_START  = 1;
+    const int PAGE_BOUNDARY_END   = 2;
+    void addPageFlipHandler(function callback);
+    void onPageFlip(int boundary);
+
+    const int READY_STATE_LOADING = 0;
+    const int READY_STATE_INTERACTIVE = 1;
+    const int READY_STATE_COMPLETE = 2;
+    void addReadyStateChangeHandler(function callback);
+    void onReadyStateChange(int readyState);
+
+    void setVisibility(bool visible);
+    bool getVisibility();
+
+    void setLocation(Location location);
+    Location getLocation();
+};
+
+interface DocumentView : View {
+
+    SpineItem getSpineItem();
+
+    void loadSpineItem(SpineItem spine);
+
+    /**
+     * Provides method of injecting user stylesheet document-level styling
+     * 
+     * @param url   the url to the stylesheet to be injected
+     * 
+     * @return false if not supported
+     */
+    bool injectStyleSheet ( string url );
+
+
+    /**
+     * Provides a method for injecting a JavaScript library into the 
+     * ReadingSystem at runtime.
+     * 
+     * @param url   the url to the JavaScript to be injected
+     * 
+     * @return false if not supported
+     */
+    bool injectJavaScript ( string url );
+
+
+    void setPaginated(bool paginate);
+    bool getPaginated();
+};
+
+
+/**
+ * @brief Provides access to the current error list.
+ */
+interface ErrorItem {
+
+    /**
+     * The types of error severity - TODO better or more complete enumeration
+     */
+    const int FATAL_ERROR = 0;
+    const int ERROR       = 1;
+    const int WARNING     = 2;
+    const int INFO        = 3;
+
+    /**
+     * Get the number of children (errors) in the current error list (or level)
+     * 
+     * @return the number of children
+     */
+    int getChildCount();
+
+    /**
+     * Returns the indicated child error item.
+     * 
+     * @param index   0-based index in the list to return
+     * 
+     * @return index   an object that implements the ErrorItem interface
+     */
+    Object   getChild ( int index );
+
+    /**
+     * Returns an array of objects that is the complete set of attributes for this 
+     * item, where the array is of the form:
+     * 
+     \code
+     *   [
+     *      { ns:string, name:string, value:string },
+     *      { ns:string, name:string, value:string },
+     *      { ns:string, name:string, value:string }
+     *                   etc.
+     *   ]
+     \endcode
+     * where\n
+     *      <c>ns</c> is the fully qualified namespace\n
+     *      <c>name</c> is the short name of the attribute (without prefix or namespace)\n
+     *      <c>value</c> is the value of the attribute
+     *
+     * @return  an array of objects that hold the complete set of attributes 
+     */
+    Object getAttributes();
+
+    /**
+     * Returns the error's ID value
+     *  
+     * @return the ID of the ErrorItem 
+     */
+    const int getID();
+
+    /**
+     * Return the severity of the specified error item 
+     *   
+     * @return an integer which represents the severity of the error 
+     */
+    const int getSeverity ();
+
+    /**
+     * Returns the string representation of the error, if any. The intent
+     * here is that the implementation may have a database of strings that 
+     * correspond to the set of possible error IDs
+     *
+     * Returns an empty string if no such string exists.
+     * 
+     * @return the string corresponding to the error ID
+     */
+    string getErrorString ();
+};
+
+/**
+ * @brief Various methods for handling events
+ *
+ * TODO:  Is this the right approach?  Handling events of known IDs seems
+ * OK, but adding other handlers to specific objects seems to assume too much knowledge of 
+ * internals
+ * 
+ */
+interface Events {
+
+    const int READER_INITIALIZED           = 100;  /// "ReaderInitialized"
+    const int PAGINATION_CHANGED           = 101;  /// "PaginationChanged"
+    const int SETTINGS_APPLIED             = 102;  /// "SettingsApplied"
+    const int FXL_VIEW_RESIZED             = 103;  /// "FXLViewResized"
+    const int READER_VIEW_CREATED          = 104;  /// "ReaderViewCreated"
+    const int READER_VIEW_DESTROYED        = 105;  /// "ReaderViewDestroyed"
+    const int CONTENT_DOCUMENT_LOAD_START  = 106;  /// "ContentDocumentLoadStart"
+    const int CONTENT_DOCUMENT_LOADED      = 107;  /// "ContentDocumentLoaded"
+    const int CONTENT_DOCUMENT_UNLOADED    = 108;  /// "ContentDocumentUnloaded"
+    const int MEDIA_OVERLAY_STATUS_CHANGED = 109;  /// "MediaOverlayStatusChanged"
+    const int MEDIA_OVERLAY_TTS_SPEAK      = 110;  /// "MediaOverlayTTSSpeak"
+    const int MEDIA_OVERLAY_TTS_STOP       = 111;  /// "MediaOverlayTTSStop"
+
+    const int EV_SELECTION_CHANGED         = 200;  /// "SelectionChanged"
+
+    /**
+     * Attach a handler for a specific, enumerated Readium event, such as 
+     * READER_INITIALIZED
+     * 
+     * @param eventID    the enumerated value of the event to be handled
+     * @param callback   a callback function to be called when the event is emitted
+     */
+    void attachHandlerForEventID ( int eventID, Object callback );
+
+    /**
+     * Removes a previously attached handler for a specific event.  The callback object
+     * is used to identify the handler to be removed.
+     * 
+     * @param eventID    the enumerated value of the event that was handled
+     * @param callback   the callback function whch was to be called when event emitted
+     */
+    void removeHandlerForEventID ( int eventID, Object callback );
+
+    /**
+     * Attach a handler for a named event (e.g. onmousedown) to a specific object
+     * 
+     * @param object     the object to which the handler should be attached
+     * @param eventName  the name of the event
+     * @param callback   the handler to be called
+     */
+    void attachHandlerForEvent ( Object object, string eventName, Object callback );
+
+    /**
+     * Remove a previously added handler from a specific object
+     * 
+     * @param object     the object to which the handler was attached
+     * @param eventName  the name of the event being handled
+     * @param callback   the callback function that was being called
+     */
+    void removeHandlerForEvent ( Object object, string eventName, Object callback );
+};
+
+/**
+ * @brief Provides methods to manage the current highlight item 
+ * 
+ */
+interface HighlightItem {
+
+    /**
+     * Returns the unique ID for this HighlightItem
+     * 
+     * @return a GUID that is the ID of this item 
+     */
+    string getGUID();
+
+    /**
+     * Get the number of children of this item
+     * 
+     * @return number of children of this item 
+     */
+    int getChildCount();
+
+    /**
+     * Returns the indicated child item.
+     * 
+     * @param index   0-based index of the child item
+     * 
+     * @return an object which implements the HighlightItem interface  
+     */
+    Object getChild ( int index );
+
+    /**
+     * Remove the specified child
+     * 
+     * @param index   0-based index of the item to be removed 
+     * 
+     * @return true if successful, false on error
+     */
+    bool removeChild (int index );
+
+    /**
+     * Set the color of this highlight (CSS color)
+     * 
+     * @param color   the hexadecimal CSS syntax color to be set
+     */
+    void setColor ( string color );
+
+    /**
+     * Get the color of the current item's highlight
+     * 
+     * @return color of the highlight in hexadecimal CSS syntax 
+     */
+    string getColor ();
+
+    /**
+     * Set the opacity of this highlight
+     * 
+     * @param opacity in range of 0..1
+     */
+    void setOpacity ( float opacity );
+
+    /**
+     * Returns the opacity of the current item's highlight
+     *  
+     * @return opacity of the current highlight, in the range 0..1 
+     */
+    float getOpacity();
+};
+
+/**
+ * @brief Encapsulates the support for highlights
+ * 
+ */
+interface Highlights {
+
+    /**
+     * Returns the root highlight element which can be used to then 
+     * traverse the current set of highlights associated with the
+     * document.
+     * 
+     * @return the object which implements the HighlightItem interface 
+     */
+    Object  getHighlightsRoot();
+
+    /**
+     * Add a highlight to the current document. If the second location
+     * is NULL the first Location MUST be a range.
+     * 
+     * @param start    location to start the hightlight, or range if end param null
+     * @param end      end location for the hightlight. Can be null if start is range
+     * @param color    CSS-style color
+     * @param opacity  opacity in the range of 0..1
+     *
+     * @return the GUID that uniquely identifies this highlight
+     */
+    string createHighlight ( Location start, Location end, string color, float opacity );
+
+    /**
+     * Convenience method to clear all highlights in current document
+     */
+    void clearHighlights();
+
+    /**
+     * Delete the specified highlight
+     * 
+     * @param item   the item to be deleted from the collection 
+     */
+    void deleteHighlight( HighlightItem item );
+
+    /**
+     * Attach a handler that will be called when any highlight is selected. The 
+     * handler will be passed the HighlightItem that has been selected
+     *
+     * The signature of the callback function MUST be
+     *
+     *    <c>callback(Object:item)</c>
+     
+     * where
+     *
+     *   <c>item</c> is the HighlightItem selected
+     * 
+     * @param handler   the supplied handler to the highlights collection 
+     */
+    void attachHandlerForHighlights( Object handler );
+
+    /**
+     * Remove handler for hit-testing on highlights.  The supplied object is 
+     * used to identify the correct handler to remove.
+     * 
+     * @param handler   the handler to remove
+     */
+    void removeHandlerForHighlights( Object handler );
+
+};
+
+/**
+ * @brief Represents a single location, which may be a single point or 
+ * a range
+ * 
+ */
+interface Location {
+
+    /** 
+     * Returns the location in the document, expressed as a CFI 
+     *
+     * @return the CFI string representing the location
+     */
+    string getLocation();
+
+    /** 
+     * Returns whether the current location is precisely known 
+     *
+     * @return true if precisely known, else false
+     */
+    bool getLocationPrecision();
+
+    /**
+     * Compare this location with another one. 
+     *
+     * TODO Implement with Promises
+     *
+     * where <c>result</c> will be\n 
+     *      -1 if the supplied value is before this one\n
+     *       0 if the supplied value is the same as this one\n
+     *       1 if the supplied value is after this one\n
+     * 
+     *    <c>precise</c> will be true if the CFI match is precise, else false
+     *
+     * @param otherLoc  the other location to be compared to this one
+     * @param callback  the function to be called with results
+     *  
+     */
+    void compare ( string otherLoc );
+};
+
+/**
+ * @brief A set of methods to provide access and control of media overlays
+ * 
+ */
+interface MediaOverlay {
+
+    /**
+     * Check to see if the specified Location has a media overlay
+     * 
+     * @param location   the location to check for media overlay
+     */
+    void hasMediaOverlay ( Location location );
+
+    /**
+     * Start or restart the current media overlay fragment.
+     * 
+     */
+    void moPlay();
+
+    /**
+     * Stops the current fragment from playing
+     * 
+     */
+    void moStop();
+
+    /**
+     * Pauses the current media overlay
+     * 
+     */
+    void moPause();
+
+    /**
+     * Rewinds the media overlay to the start of the current fragment
+     * 
+     */
+    void moReset();
+
+    /**
+     * Cause the playback to escape the current audio context
+     * 
+     */
+    void escapeCurrentContext();
+
+    /**
+     * Called when the media overlay handler encounters an error.
+     * THe parameter is a function callback that must have the 
+     * signature
+     * function ( int ID, Object json )
+     * 
+     * where
+     *     ID is one of the specified MO errors
+     *     json is an JSON array that provides more info
+     * 
+     * TODO:  Enumerate errors...
+     * 
+     * @param callback   A function that will be called on errors 
+     */
+    void onMOError( Object callback  );
+
+    /**
+     * Turn on or off touch-to-play capability
+     * 
+     * @param enable   true enables touch-to-play, false disables it
+     */
+    void setTouchToPlay ( bool enable );
+
+    /**
+     * Returns the current state of the touch to play property
+     * 
+     * @return the state of the touch to play property 
+     */
+    bool getTouchToPlay();
+
+    /**
+     * Set the audio playback rate
+     * 
+     * @param rate   the rate in the range 0.1 to 4.0 
+     */
+    void setPlaybackRate ( float rate );
+
+    /**
+     * Returns the current value of the playback property
+     * 
+     * @return the state of the touch to play property 
+     */
+    float getPlaybackRate();
+
+    /**
+     * Set the relative audio volume
+     * 
+     * @param volume   the relative volume in percent, from 0 to 100%
+     */
+    void setAudioVolume ( float volume );
+
+    /**
+     * Returns the current value of the relative playback volume
+     * 
+     * @return the current value of the playback volume 
+     */
+    float getAudioVolume();
+
+    /**
+     * Set the audio highlight color
+     * 
+     * @param color   the color of the highlight, in hexadecimal CSS syntax
+     */
+    void setMOHighlightColor ( string color );
+
+    /**
+     * Return the currently selected highlight color
+     * 
+     * @return the currently selected highlight color
+     */
+    string getMOHighlightColor();
+
+    /**
+     * Enable or disable scroll during playback
+     * 
+     * @param enable   Enabled if true, else disabled
+     */
+    void enableScrollDuringPlayback ( bool enable );
+
+    /**
+     * Return the state of the enable-scroll-during-playback property
+     * 
+     * @return the state of the enable-scroll-during-playback property
+     */
+    bool getEnableScrollDuringPlayback();
+
+    /**
+     * Enable or disable automatic page turn
+     * 
+     * @param enable   Enabled if true else false
+     */
+    void enableAutomaticPageTurn ( bool enable );
+
+    /**
+     * Returns the current state of the enable-automatic-page-turn property
+     * 
+     * @return the current state of the enable-automatic-page-turn property 
+     */
+    bool getEnableAutomaticPageTurn();
+
+    /**
+     * Enable or disable skippability
+     * 
+     * @param enable   Enable if true, else false
+     */
+    void enableSkippability ( bool enable );
+
+    /**
+     * Return the current state of the enable-skippability property
+     * 
+     * @return the current state of the enable-skippability property 
+     */
+    bool getEnableSkippability();
+};
+
+
+/**
+ * @brief Enables querying and constrolling how screens and/or pages are
+ * laid out.
+ * 
+ */
+interface PageLayout {
+
+    const REND_LAYOUT_PREPAGINATED = 0;
+    const REND_LAYOUT_REFLOWABLE   = 1;
+
+    const REND_ORIENT_AUTO      = 0;
+    const REND_ORIENT_LANDSCAPE = 1;
+    const REND_ORIENT_PORTRAIT  = 2;
+
+    const REND_SPREAD_AUTO      = 0;
+    const REND_SPREAD_LANDSCAPE = 1;
+    const REND_SPREAD_PORTRAIT  = 2;
+    const REND_SPREAD_NONE      = 3;
+
+    const REND_FLOW_PAGINATED   = 0;
+    const REND_FLOW_CONTINUOUS  = 1;
+    const REND_FLOW_DOCUMENT    = 2;
+    const REND_FLOW_FIXED       = 3;
+
+    /**
+     * Returns the current document-level rendition layout parameter 
+     * 
+     * @return an integer constant that indicates paginated or reflowable
+     */
+    int getRenditionLayout();
+
+    /**
+     * Set the rendition orientation property for the current document
+     * 
+     * Note: The reading system may ignore this setting, in which case
+     * the return value is false.
+     * 
+     * @param orient   the desired orientation (see constants above) 
+     *
+     * @return true if not ignored else false
+     */
+    bool setRenditionOrientation ( int orient );
+
+    /**
+     * Returns the document-level rendition orientation
+     * 
+     * @return the current rendition-orientation setting (see constants above)
+     */
+    int getRenditionOrientation();
+
+    /**
+     * Set the layout mode for the current screen(s)
+     * 
+     * Note: This may fail if the document is set to Spread:None 
+     * 
+     * @param spread   the current layout mode (see constants above)
+     */
+    bool setRenditionSpread ( int spread );
+
+    /**
+     * Return the document-level rendition:spread property or setting
+     *  
+     * @return integer 
+     */
+    int getRenditionSpread();
+
+    /**
+     * Set the renditiion flow mode for the document
+     * 
+     * Note: If the document is not reflowable the method will return false
+     *
+     * @param mode   the desired rendition flow mode   (see constants above)
+     * 
+     * @return true if not ignored else false 
+     */
+    bool setRenditionFlow ( int mode );
+
+    /**
+     * Returns the document-level rendition flow mode
+     * 
+     * Note: If the document is fixed layout this will always return 
+     * REND_FLOW_FIXED, indicating that the document is fixed layout
+     * 
+     * @return the constant that is the current rendition flow state 
+     */
+    int getRenditionFlow();
+
+    /**
+     * Set the width (in pixels) of the display available for layout of
+     * the screens (pages). This is the width of the displays available 
+     * to layout spreads, including the margins and gutter width, if any.
+     * 
+     * Note: This may not be supported on some devices
+     * 
+     * @param width  the width in pixels
+     *
+     * @return false if request not supported
+     */
+    bool setLayoutWidth ( int width );
+
+    /**
+     * Returns the current width of the display surface (in pixels) available
+     * to layout screens (pages), including margins and gutters.
+     * 
+     * @return integer 
+     */
+    int getLayoutWidth ();
+
+    /**
+     * Returns the gutter distance between synthetic spread pages
+     *
+     * Note: If there is no synthetic spread the returned string will be 
+     * empty.
+     * 
+     * @return the width of the gutter in CSS units
+     */
+    string getGutterWidth();
+
+    /**
+     * Sets the gutter width between synthetic spread pages
+     * 
+     * Note: Will fail if the document or reading system does not allow 
+     * synthetic spreads
+     *
+     * @param width   width of the gutter in CSS units
+     * 
+     * @return true if successful else false 
+     */
+    bool setGutterWidth( string width );
+
+    /**
+     * Get the margins setting for the current document.
+     * 
+     * Note:  Will be empty for fixed-layout documents
+     * 
+     * @return the margins string in CSS fashion (all, or top, right, bottom, left)
+     */
+    string getMargins();
+
+    /**
+     * Set the margins for the current document.
+     * 
+     * Note: Will return false for fixed-layout documents
+     * 
+     * @param margins   desired margins in CSS syntax (all, or top, right, bottom, left)
+     * 
+     * @return true if successful false if ignored or not supported 
+     */
+    bool setMargins( string margins );
+};
+
+
+
+
+/**
+ * @brief The official EPUB reading system object. Interface defined in 
+ * the EPUB spec here (@link http://www.idpf.org/epub/31/spec/epub-contentdocs-20160906.html#app-epubReadingSystem)
+ * 
+ */
+interface ReadingSystemObject {
+
+    /**
+     * The name of the reading system 
+     *
+     * @return The name of the reading system, if any
+     */
+    string getName();
+
+    /**
+     * Returns the version of the reading system.\n
+     * This returns a JSON array of the form:
+     *  
+     \code
+     *   [
+     *      { module:name, version:commit-hash },
+     *      { module:name, version:commit-hash },
+     *      { module:name, version:commit-hash }
+     *                     etc.
+     *   ]
+     \endcode
+     *
+     * @return  a JSON array with the version info
+     */
+    Object getVersion();
+
+    /* Note:  Not supporting getLayoutStyle, which is now deprecated as of  EPUB 3.1 */
+
+    /**
+     * General query method.  Returns true or false depending on whether the feature is
+     * supported by the current reading system.
+     *
+     * As of 3.1, the queries that should be supported include:
+     \code
+     *      dom-manipulation
+     *      layout-changes
+     *      touch-events
+     *      mouse-events
+     *      keyboard-events
+     *      spine-scripting
+     \endcode
+     *
+     * @param feature   the feature to be tested for
+     * @param version   the version of the feature to be tested for (<i>discouraged</i>)
+     * @return  true if feature supported else false
+     */
+    bool hasFeature( string feature, optional string version );
+};
+
+/**
+ * @brief Interface to the search capability of the underlying implementation.
+ * 
+ */
+
+interface Search {
+
+    const int       SEARCH_BACKWARD       = 1;
+    const int       SEARCH_WRAP_ON_END    = 2;
+    const int       SEARCH_WHOLE_WORD     = 4;
+    const int       SEARCH_IGNORE_CASE    = 8;
+    const int       SEARCH_IGNORE_DIACRIT = 16;
+    const int       SEARCH_NEXT_RESULT    = 32;
+
+    /**
+     * Searches for ALL succesful results for the specified string between the 
+     * start and end locations.  
+     * Note: If the search is backwards or the document is rtl, then the start location
+     * will be closer to the end of the document than the end location
+     * The returned object is the results.
+     *
+     *   <c>results</c> is an array of the form:\n
+     \code
+     *   [
+     *      { start:loc, end:loc, result:string },
+     *      { start:loc, end:loc, result:string },
+     *      { start:loc, end:loc, result:string }
+      *                     etc.
+     *   ]
+     \endcode
+     * 
+     * @param startLoc    if null, startLoc is the beginning of the document
+     * @param endLoc      if null, endLoc is the end of the document.
+     * @param modifiers   bitwise combination of flags (see above)
+     * @param findText    the text to find
+     *
+     * @return an array of the results
+     */
+    Object  search ( Location startLoc, Location endLoc, int modifiers, string textToFind );   
+
+};
+
+/**
+ * @brief Provides access to the current selection in the document. There can
+ * only be one selection at a time and must be a contiguous range.
+ * 
+ */
+interface Selection {
+
+    /**
+     * Get the current selection.  The results are returned in
+     * an object whose form is 
+     *
+     \code
+     *      { start:loc, end:loc, result:string },
+     \endcode
+     *   
+     * QUESTION: What if it includes image(s), either raster or SVG?
+     * 
+     * @return is null if there is no current selection
+     */
+    Object    getCurrentSelection();
+};
+
+/**
+ * @brief Methods for managing the spine
+ * 
+ * TODO: Need to provide access to spine-level overrides
+ */
+interface SpineItem {
+
+    /**
+     * Retrieve the actual Publication::Link wrapped by this item
+     * 
+     * @return the actual Link wrapped by this item 
+     */
+    Link  getLink ();
+
+    /**
+     * Get the `idref` of the element
+     * 
+     * @return the `ideref` of the spine item wrapped in this item 
+     */
+    string   getIdref();
+
+    /**
+     * Get the `href` of the element
+     * 
+     * @return the `idref` of the spine item wrapped in this item 
+     */
+    string   getHref();
+};
+
+/**
+ * @brief Interface to enable controlling the way in which text on a page
+ * is rendered
+ * 
+ */
+interface TextRendering {
+
+    /**
+     * Returns the distance (in CSS units) between baselines in the current font
+     * 
+     * @return the lineHeight expressed in CSS units 
+     */
+    string getLineHeight();
+
+    /**
+     * Sets the the distance (in CSS units) between baselines in the current font
+     *  
+     * Note that this call will fail for fixed layout pages and return false.
+     *
+     * @param height   the height in CSS length units between baselines
+     *
+     * @return true if the line-height was updated else false 
+     */
+    bool setLineHeight( float height );
+
+    /**
+     * Returns the number of columns the screen is laid out in.
+     * 
+     * Note that this is columns within a single page, not whether
+     * the screen is laid as a synthetic spread or not. See synthetic spread
+     * 
+     * @return number of columns 
+     */
+    int getNumColumns();
+
+    /**
+     * Sets the number of columns laid out within a single page.
+     * 
+     * Note that this is columns within a single page, not whether
+     * the screen is laid as a synthetic spread or not. See synthetic spread
+     * 
+     * @param nCol   the number of columns to set
+     *
+     * @return true if successful false if not supported
+     */
+    bool setNumColumns( int nCol );
+
+    /**
+     * Returns the size of a column cap between columns on the page (not the gutter 
+     * between pages in a spread).  Will be zero if multiple columns are not 
+     * supported.
+     * 
+     * @return the column gap in CSS lengths. 
+     */
+    string getColumnGap();
+
+    /**
+     * Set gap between CSS columns in CSS length units
+     * 
+     * @return true if supported else false
+     */
+    bool setColumnGap();
+
+    /**
+     * Sets the justification for the text layout.
+     *
+     * Note that this will apply to the whole document, not just the 
+     * current screen
+     * 
+     * @param justify   the type of justification (CSS enumeration: left, right, center or justify)
+     *
+     * @return true if successful false if not supported
+     */
+    bool setJustification ( string justify );
+
+    /**
+     * Returns the justification setting for the current document
+     *  
+     * @return type of justification (CSS enumeration: left, right, center or justify)
+     */
+    string getJustification();
+
+    /**
+     * Sets the color of the current font
+     * 
+     * @param fontColor   the foreground font color in hexadecimal CSS color syntax
+     */
+    void setFontColor ( string fontColor );
+
+    /**
+     * Returns the current font color for the document
+     * 
+     * @return font color in hexadecimal CSS color syntax
+     */
+    string getFontColor();
+
+    /**
+     * Returns the height of the current document font
+     * 
+     * Note: Returns empty string for fixed layout spine items
+     * 
+     * @return font height in CSS length syntax
+     */
+    string getFontHeight();
+
+    /**
+     * Sets the height of the font for the current spine item
+     * 
+     * Note: Will fail and return false for fixed layout spine items
+     *
+     * @param fontHeight   the fontHeight in CSS length syntax
+     * 
+     * @return true if successful else false 
+     */
+    bool setFontHeight( string fontHeight );
+
+    /**
+     * Returns the current font-face name for the document
+     * 
+     * Note: Will fail for fixed-layout spine items and return
+     * and empty string
+     * 
+     * @return string 
+     */
+    string getFontFace();
+
+    /**
+     * Set the font-face for the current document
+     * 
+     * Note: Will fail for fixed layout spine items
+     * 
+     * @param fontFace   the desired font-face 
+     * 
+     * @return true if successful false if not supported
+     */
+    bool setFontFace ( string fontFace );
+};
+
+/**
+ * @brief Provides methods for zooming or otherwise transforming
+ * the page content
+ *
+ * TODO:  Add additional methods (e.g. pan, matrix methods, etc.)
+ */
+interface Transform {
+
+    /**
+     * Returns the current zoom level for the current screen
+     *  
+     * @return the current zoom factor 
+     */
+    float getZoom();
+
+    /**
+     * Sets the current zoom level for the page
+     * 
+     * @param zoom   the desired zoom factor
+     */
+    void setZoom( float zoom );
+};
+
+/** @}*/

@@ -1,0 +1,266 @@
+/** 
+ * @defgroup Streamer
+ * @brief Responsible for parsing a publication, and for fetching resources.
+ * 
+ * The streamer can be divided into four different parts:
+ * - In-memory models
+ * - Parser
+ * - Fetcher
+ * - Server
+ *
+ * __In-memory Models__
+ * - As defined in this module's documentation.
+ * 
+ * __Parser__
+ * 
+ * - Access packaged or exploded publications
+ * - Parse EPUB 2.x and 3.x
+ *   - Metadata
+ *   - Spine & Manifest
+ *   - Table of contents (NCX, Navigation Document)
+ *   - Media overlays
+ *   - Encryption resources
+ *   
+ * __Fetcher__
+ * 
+ * - Get the content of a publication's resource
+ * - Deobfuscate & decrypt resources
+ * 
+ * __Server__
+ * 
+ * - Output a [Readium Web Publication Manifest](https://github.com/readium/webpub-manifest)
+ * - Serve the publication's resources
+ * - Provide a number of APIs to interact with the publication
+ */
+ 
+/**
+ * @addtogroup Streamer
+ * @{
+ */
+
+
+interface Publication {
+
+    /// The context definition.
+    string context;
+    /// The metadata for the publication.
+    Metadata metadata;
+    /// List of relational links.
+    Link[] links;
+    /// List of resources in reading order for the publication.
+    Link[] spine;
+    /// List of resources that are necessary for rendering the publication.
+    Link[] resources;
+    /// List of resources that make up the table of contents.
+    Link[] tableOfContents;
+    /// List of resources that make up the page list.
+    Link[] pageList;
+    /// List of resources in the landmarks collection.
+    Link[] landmarks;
+    /// List of audio files.
+    Link[] listOfAudioFiles;
+    /// List of illustrations.
+    Link[] listOfIllustrations;
+    /// List of tables.
+    Link[] listOfTables;
+    /// List of videos.
+    Link[] listOfVideos;
+    
+    /// Collection of images from OPDS
+    Link[] images;
+
+    /// Extension point for links that shouldn't show up in the manifest
+    Link[] otherLinks;
+
+    /// Extension point for collections that shouldn't show up in the manifest
+    PublicationCollection[] otherCollections;
+
+    /**
+     * Get a Link to the cover.
+     * 
+     * @returns the cover resource link
+     */
+    Link getCover();
+
+    /**
+     * Get a Link to the navigation document.
+     * 
+     * @returns the navigation document link
+     */
+    Link getNavDoc();
+
+    /**
+     * Get a Link, resource or spine item, with a matching relative path.
+     *
+     * @param   relativePath: The relative path to match
+     * @returns a link with its `href` equal to the path if any was found,
+     *          else `null`
+     */
+    Link getResource(string relativePath);
+
+    /**
+     * Get a Link from the spine having the given href.
+     *
+     * @param   href: The `href` being searched
+     * @returns the corresponding Link, if any
+     */
+    Link getSpineItem(string href);
+
+
+    /**
+     * Get the first Link having the given `rel` in the 
+     * publication collections: `links`, `spine`, `resources`.
+     *
+     * @param   rel: The `rel` being searched
+     * @returns the corresponding Link, if any
+     */
+    Link getLinkByRel(string rel);
+
+    /**
+     * Get the first Link having the given `href` in the 
+     * publication collections: `links`, `spine`, `resources`.
+     *
+     * @param   href: The `href` being searched
+     * @returns the corresponding Link, if any
+     */
+    Link getLinkByHref(string href);
+
+    /**
+     * Get the JSON representation of this publication's WebPub Manifest.
+     * 
+     * @returns the serialized JSON for the WebPubManifest (canonical)
+     */
+    string getManifestJSON();
+};
+
+interface Metadata {
+    
+    string rdfType;
+    MultiLanguage   title;          
+    string identifier;
+    Contributor[] author;
+    Contributor[] translator;
+    Contributor[] editor;
+    Contributor[] artist;
+    Contributor[] illustrator;
+    Contributor[] letterer;
+    Contributor[] penciler;
+    Contributor[] colorist;
+    Contributor[] inker;
+    Contributor[] narrator;
+    Contributor[] contributor;
+    Contributor[] publisher;
+    Contributor[] imprint;
+    string[] language;
+    Date modified;
+    Date publicationDate;
+    string description;
+    string direction;
+    Properties rendition;
+    string source;
+    string[] epubType;
+    string rights;
+    Subject[] subject;
+    BelongsTo belongsTo;
+    int duration;
+
+    /// TODO: The TS streamer has this
+    MediaOverlay mediaOverlay;
+
+    /// Extension point for other metadata
+    MetaItem[] otherMetadata;
+};
+
+interface Link {
+    
+    string href;
+    string typeLink;
+    string[] rel;
+    int height;
+    int width;
+    string title;
+    Properties properties;
+
+    /// TODO: The TS streamer has this as a number type. Go streamer has it as a string
+    string duration;
+
+    bool templated;
+    int bitrate;
+    MediaOverlayNode[] MediaOverlays;
+    Link[] children;
+};
+
+/// Represents a generic metadata element.
+struct MetaItem {
+    string property;
+    string value;
+    MetaItem[] children;
+};
+
+/// Contributor construct used internally for all contributors
+struct Contributor {
+    MultiLanguage name;
+    string sortAs;
+    string identifier;
+    string role;
+};
+
+/// Properties object use to link properties
+/// To be used also in Rendition for fxl
+struct Properties {
+    string[] contains;
+    string layout;
+    string mediaOverlay;
+    string orientation;
+    string overflow;
+    string page;
+    string spread;
+    Encryption encryption;
+};
+
+/// Contains metadata from encryption xml
+struct Encryption {
+    string scheme;
+    string profile;
+    string algorithm;
+    string compression;
+    int originalLength;
+};
+
+/// Subject as based on EPUB 3.1 and WePpub
+struct Subject {
+    string name;
+    string sortAs;
+    string scheme;
+    string code;
+};
+
+/// List of collections/series that a publication belongs to
+struct BelongsTo {
+    Collection[] series;
+    Collection[] collection;
+};
+
+/// Collection construct used for collection/serie metadata
+struct Collection {
+    string name;
+    string sortAs;
+    string identifier;
+    float position;
+};
+
+/// Store the a basic string when we only have one language.
+/// Store in a hash by language for multiple string representation
+struct MultiLanguage {
+    string singleString;
+    Map<string, string> multiString;
+};
+
+struct MediaOverlayNode {
+    string text;
+    string audio;
+    string role;
+    MediaOverlayNode[] children;
+};
+
+/** @}*/
