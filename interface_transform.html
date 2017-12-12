@@ -8,7 +8,7 @@
         <meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
         <meta name="generator" content="Doxygen 1.8.13"/>
         <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
-        <title>Readium Interfaces: Main Page</title>
+        <title>Readium Interfaces: Transform Interface Reference</title>
         <!--<link href="tabs.css" rel="stylesheet" type="text/css"/>-->
         <script type="text/javascript" src="dynsections.js"></script>
         <link href="search/search.css" rel="stylesheet" type="text/css"/>
@@ -54,7 +54,6 @@ $(function() {
 });
 </script>
 <div id="main-nav"></div>
-</div><!-- top -->
 <!-- window showing the filter options -->
 <div id="MSearchSelectWindow"
      onmouseover="return searchBox.OnSearchSelectShow()"
@@ -69,11 +68,78 @@ $(function() {
 </iframe>
 </div>
 
+</div><!-- top -->
 <div class="header">
+  <div class="summary">
+<a href="#pub-methods">Methods</a> &#124;
+<a href="interface_transform-members.html">List of all members</a>  </div>
   <div class="headertitle">
-<div class="title">Readium Interfaces Documentation</div>  </div>
+<div class="title">Transform Interface Reference<div class="ingroups"><a class="el" href="group___navigator.html">Navigator</a></div></div>  </div>
 </div><!--header-->
 <div class="contents">
+<a name="details" id="details"></a><h2 class="groupheader">Description</h2>
+<div class="textblock"><p>Provides methods for zooming or otherwise transforming the page content. </p>
+<p>TODO: Add additional methods (e.g. pan, matrix methods, etc.) </p>
+</div><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="pub-methods"></a>
+Methods</h2></td></tr>
+<tr class="memitem:a4eb9642d18cb5b76896ef46c46a330f9"><td class="memItemLeft" align="right" valign="top">float&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_transform.html#a4eb9642d18cb5b76896ef46c46a330f9">getZoom</a> ()</td></tr>
+<tr class="memdesc:a4eb9642d18cb5b76896ef46c46a330f9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns the current zoom level for the current screen.  <a href="#a4eb9642d18cb5b76896ef46c46a330f9">More...</a><br /></td></tr>
+<tr class="separator:a4eb9642d18cb5b76896ef46c46a330f9"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1d265cb6422f8ff7c9f4b5736a74c619"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="interface_transform.html#a1d265cb6422f8ff7c9f4b5736a74c619">setZoom</a> (float zoom)</td></tr>
+<tr class="memdesc:a1d265cb6422f8ff7c9f4b5736a74c619"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the current zoom level for the page.  <a href="#a1d265cb6422f8ff7c9f4b5736a74c619">More...</a><br /></td></tr>
+<tr class="separator:a1d265cb6422f8ff7c9f4b5736a74c619"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table>
+<h2 class="groupheader">Method Documentation</h2>
+<a id="a4eb9642d18cb5b76896ef46c46a330f9"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a4eb9642d18cb5b76896ef46c46a330f9">&#9670;&nbsp;</a></span>getZoom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">float Transform::getZoom </td>
+          <td>(</td>
+          <td class="paramname"></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Returns the current zoom level for the current screen. </p>
+<dl class="section return"><dt>Returns</dt><dd>the current zoom factor </dd></dl>
+
+</div>
+</div>
+<a id="a1d265cb6422f8ff7c9f4b5736a74c619"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a1d265cb6422f8ff7c9f4b5736a74c619">&#9670;&nbsp;</a></span>setZoom()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Transform::setZoom </td>
+          <td>(</td>
+          <td class="paramtype">float&#160;</td>
+          <td class="paramname"><em>zoom</em></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the current zoom level for the page. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">zoom</td><td>the desired zoom factor </td></tr>
+  </table>
+  </dd>
+</dl>
+
+</div>
+</div>
+<hr/>The documentation for this interface was generated from the following file:<ul>
+<li>/Users/juanc/Projects/readium/readium-ng/readium-interfaces/src/<a class="el" href="_navigator_8idl_source.html">Navigator.idl</a></li>
+</ul>
 </div><!-- contents -->
 <!-- HTML footer for doxygen 1.8.8-->
 <!-- start footer part -->

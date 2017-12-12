@@ -1,0 +1,178 @@
+body, table, div, p, dl {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+    font-weight: 400;
+}
+
+nav.navbar-default {
+    background-color: #f1f1f1;
+    border-color: #676767;
+    border-bottom: 1px solid #dcdcdc !important;
+    border-radius: 0;
+}
+
+nav .navbar-brand>img.logo {
+    max-width: 30px;
+    max-height: 30px;
+    display: inline-block;
+    margin-right: 10px;
+    top: -2px;
+    position: relative;
+}
+
+nav .navbar-brand {
+    margin-top: -3px;
+}
+
+#content a {
+    color: #367D3C;
+}
+
+#content h1, #content .h1, #content h2, #content .h2, #content h3, #content .h3 {
+    font-weight: normal !important;
+}
+
+#content .page-header .title {
+    margin-top: 0;
+}
+
+#content .summary { 
+    float: initial; 
+    font-size: 4px;
+    padding-right: 5px; 
+    width: auto; 
+    text-align: right; 
+    position: absolute;
+    top: 0;
+    right: 25px;
+    color: transparent;
+    margin-top: 0; 
+}
+
+#content tr.heading h2 {
+    margin-top: 0;
+}
+
+.contents .memtitle {
+    padding: 0;
+    border-top: inherit; 
+    border-left: inherit; 
+    border-right: inherit; 
+    border-top-right-radius: inherit; 
+    border-top-left-radius: inherit; 
+    margin-bottom: 0; 
+    background-image: none; 
+    background-repeat: repeat-x; 
+    background-color: inherit; 
+    font-weight: inherit; 
+    float: right;
+    margin: 0;
+    line-height: 43px;
+    height: 43px;
+    margin-right: 10px;
+    font-size: 1em;
+    color: transparent;
+}
+
+.contents .memname, .contents .memItemLeft, .contents .paramname, .directory td:first-child {
+    font-family: Monaco, Menlo, monospaced !important;
+    font-size: 95%;
+}
+
+.panel-body table.params.table {
+    table-layout: fixed;
+}
+
+.panel-body table.params.table .paramname {
+    width: 15%;
+    font-size: 90%;
+}
+
+.contents .memtitle .permalink {
+    font-size: 70%;
+    float: right;
+    margin-left: 0.5em;
+}
+
+.contents .memname {
+    margin-left: 0px;
+}
+
+.table>tbody>tr>td.paramname {
+    padding-left: 0;
+}
+
+.params .paramname, .retval .paramname {
+    font-weight: 500;
+}
+
+.contents code {
+    padding: 2px;
+    font-size: 90%;
+    color: #3a423c;
+    background-color: #f1f9f1;
+    border-radius: 4px;
+}
+
+#MSearchBox {
+    border: 1px solid #ccc;
+    border-radius: 1em;
+}
+#MSearchBox .left, #MSearchBox .right, #MSearchBox input {
+    background: inherit;
+}
+
+.contents dl:last-of-type {
+    margin-bottom: 0px;
+}
+.contents dt {
+    font-weight: 500;
+}
+
+.contents .heading td {
+    padding-left: 0px;
+    padding-right: 0px;
+}
+
+.table>tbody>tr>td, .table>tbody>tr>th, .table>tfoot>tr>td, .table>tfoot>tr>th, .table>thead>tr>td, .table>thead>tr>th {
+    border-top: none !important;
+}
+
+.contents .memSeparator {
+    border-bottom: none;
+}
+
+.headertitle div.ingroups {
+     font-size: 16px;
+}
+
+.search-box {
+    position: absolute;
+    right: 0;
+    z-index: 10;
+}
+
+#MSearchSelectWindow {
+    top: -32px !important;
+    left: 87% !important;
+}
+
+#MSearchBox {
+    margin-top: 12px;
+}
+
+#main-nav a[href="[separator]"] {
+    color: transparent !important;
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+    height: 35px;
+    transform: translateY(8px);
+    background: #e2e2e2;
+    width: 1px;
+    margin: 0px 10px;
+    user-select: none;
+    pointer-events: none;
+}
+
+#content div.dyncontent img {
+    filter: inherit;
+}
