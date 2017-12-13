@@ -428,9 +428,9 @@ interface View {
     void render();
     void destroy();
 
-    const int SCREEN_BOUNDARY_NONE   = 0;
-    const int SCREEN_BOUNDARY_START  = 1;
-    const int SCREEN_BOUNDARY_END   = 2;
+    const int SCREEN_BOUNDARY_NONE = 0;
+    const int SCREEN_BOUNDARY_START = 1;
+    const int SCREEN_BOUNDARY_END = 2;
     void addScreenChangeHandler(function callback);
     void onScreenChange(int screenBoundary);
 
@@ -447,7 +447,12 @@ interface View {
     bool getVisibility();
 
     void setLocation(Location location);
-    Location getLocation();
+    
+    Location getLocationScreenBegin();
+    Location getLocationScreenEnd();
+
+    Location getLocationFirstScreen();
+    Location getLocationFinalScreen();
 };
 
 interface DocumentView : View {
