@@ -95,15 +95,15 @@ Attributes</h2></td></tr>
 <tr class="memitem:a2984d588d16e89241d57fc2a5efbd369"><td class="memItemLeft" align="right" valign="top"><a id="a2984d588d16e89241d57fc2a5efbd369"></a>
 <a class="el" href="interface_view.html">View</a>&#160;</td><td class="memItemRight" valign="bottom"><b>parent</b></td></tr>
 <tr class="separator:a2984d588d16e89241d57fc2a5efbd369"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aca9894b16b64b5a4bd32013a557e72b8"><td class="memItemLeft" align="right" valign="top"><a id="aca9894b16b64b5a4bd32013a557e72b8"></a>
-const int&#160;</td><td class="memItemRight" valign="bottom"><b>PAGE_BOUNDARY_NONE</b> = 0</td></tr>
-<tr class="separator:aca9894b16b64b5a4bd32013a557e72b8"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8de267abdf36245ffcc047e53e94433f"><td class="memItemLeft" align="right" valign="top"><a id="a8de267abdf36245ffcc047e53e94433f"></a>
-const int&#160;</td><td class="memItemRight" valign="bottom"><b>PAGE_BOUNDARY_START</b> = 1</td></tr>
-<tr class="separator:a8de267abdf36245ffcc047e53e94433f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a278191632a87b1cac33b342f1e18c55c"><td class="memItemLeft" align="right" valign="top"><a id="a278191632a87b1cac33b342f1e18c55c"></a>
-const int&#160;</td><td class="memItemRight" valign="bottom"><b>PAGE_BOUNDARY_END</b> = 2</td></tr>
-<tr class="separator:a278191632a87b1cac33b342f1e18c55c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a5845030077e0a65af3c128be5f9bfb11"><td class="memItemLeft" align="right" valign="top"><a id="a5845030077e0a65af3c128be5f9bfb11"></a>
+const int&#160;</td><td class="memItemRight" valign="bottom"><b>SCREEN_BOUNDARY_NONE</b> = 0</td></tr>
+<tr class="separator:a5845030077e0a65af3c128be5f9bfb11"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a1a984140d3e1a35d009f9f74f23a727c"><td class="memItemLeft" align="right" valign="top"><a id="a1a984140d3e1a35d009f9f74f23a727c"></a>
+const int&#160;</td><td class="memItemRight" valign="bottom"><b>SCREEN_BOUNDARY_START</b> = 1</td></tr>
+<tr class="separator:a1a984140d3e1a35d009f9f74f23a727c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4c79252291c7a5fa47986506a2782e43"><td class="memItemLeft" align="right" valign="top"><a id="a4c79252291c7a5fa47986506a2782e43"></a>
+const int&#160;</td><td class="memItemRight" valign="bottom"><b>SCREEN_BOUNDARY_END</b> = 2</td></tr>
+<tr class="separator:a4c79252291c7a5fa47986506a2782e43"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a58e376059cde1d72429933a6643bbaf6"><td class="memItemLeft" align="right" valign="top"><a id="a58e376059cde1d72429933a6643bbaf6"></a>
 const int&#160;</td><td class="memItemRight" valign="bottom"><b>READY_STATE_LOADING</b> = 0</td></tr>
 <tr class="separator:a58e376059cde1d72429933a6643bbaf6"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -122,12 +122,18 @@ void&#160;</td><td class="memItemRight" valign="bottom"><b>render</b> ()</td></t
 <tr class="memitem:adba270afa98c7f3f240501abc8aaaf31"><td class="memItemLeft" align="right" valign="top"><a id="adba270afa98c7f3f240501abc8aaaf31"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>destroy</b> ()</td></tr>
 <tr class="separator:adba270afa98c7f3f240501abc8aaaf31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7910db7b04269a886db68d7aede7f4f5"><td class="memItemLeft" align="right" valign="top"><a id="a7910db7b04269a886db68d7aede7f4f5"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>addPageFlipHandler</b> (function callback)</td></tr>
-<tr class="separator:a7910db7b04269a886db68d7aede7f4f5"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a2c217085f34649232699cf9566592ff6"><td class="memItemLeft" align="right" valign="top"><a id="a2c217085f34649232699cf9566592ff6"></a>
-void&#160;</td><td class="memItemRight" valign="bottom"><b>onPageFlip</b> (int boundary)</td></tr>
-<tr class="separator:a2c217085f34649232699cf9566592ff6"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf40124ab16114a7527fdf43260bda9f"><td class="memItemLeft" align="right" valign="top"><a id="acf40124ab16114a7527fdf43260bda9f"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>addScreenChangeHandler</b> (function callback)</td></tr>
+<tr class="separator:acf40124ab16114a7527fdf43260bda9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a44cc17824611aea9371f1bcbf0c0c743"><td class="memItemLeft" align="right" valign="top"><a id="a44cc17824611aea9371f1bcbf0c0c743"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>onScreenChange</b> (int screenBoundary)</td></tr>
+<tr class="separator:a44cc17824611aea9371f1bcbf0c0c743"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2baf62b148fe9cd99caaa467c7e73035"><td class="memItemLeft" align="right" valign="top"><a id="a2baf62b148fe9cd99caaa467c7e73035"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>nextScreen</b> ()</td></tr>
+<tr class="separator:a2baf62b148fe9cd99caaa467c7e73035"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad56c2be3dc3b73a7584e0395f67f8d10"><td class="memItemLeft" align="right" valign="top"><a id="ad56c2be3dc3b73a7584e0395f67f8d10"></a>
+void&#160;</td><td class="memItemRight" valign="bottom"><b>previousScreen</b> ()</td></tr>
+<tr class="separator:ad56c2be3dc3b73a7584e0395f67f8d10"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aa830cc00b6006f68dc313696c2c5adee"><td class="memItemLeft" align="right" valign="top"><a id="aa830cc00b6006f68dc313696c2c5adee"></a>
 void&#160;</td><td class="memItemRight" valign="bottom"><b>addReadyStateChangeHandler</b> (function callback)</td></tr>
 <tr class="separator:aa830cc00b6006f68dc313696c2c5adee"><td class="memSeparator" colspan="2">&#160;</td></tr>
