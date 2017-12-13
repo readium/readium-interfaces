@@ -395,12 +395,12 @@ interface LayoutView : View {
     View shift();
     int unshift(View view);
 
-    View[] getViewsInDisplay();
+    View[] getViewsInScreen();
 
-    void displayView(View view, int displayIndex);
+    void displayViewInScreen(View view, int displayIndex);
 
-    void setDisplayCount(int displayCount);
-    int getDisplayCount();
+    void setScreenDisplayCount(int displayCount);
+    int getScreenDisplayCount();
 
     void addViewDisplayedHandler(function callback);
     void onViewDisplayed(View view, int displayIndex);
@@ -428,11 +428,14 @@ interface View {
     void render();
     void destroy();
 
-    const int PAGE_BOUNDARY_NONE   = 0;
-    const int PAGE_BOUNDARY_START  = 1;
-    const int PAGE_BOUNDARY_END   = 2;
-    void addPageFlipHandler(function callback);
-    void onPageFlip(int boundary);
+    const int SCREEN_BOUNDARY_NONE   = 0;
+    const int SCREEN_BOUNDARY_START  = 1;
+    const int SCREEN_BOUNDARY_END   = 2;
+    void addScreenChangeHandler(function callback);
+    void onScreenChange(int screenBoundary);
+
+    void nextScreen();
+    void previousScreen();
 
     const int READY_STATE_LOADING = 0;
     const int READY_STATE_INTERACTIVE = 1;
@@ -451,7 +454,7 @@ interface DocumentView : View {
 
     SpineItem getSpineItem();
 
-    void loadSpineItem(SpineItem spine);
+    void loadSpineItem(SpineItem spineItem);
 
     /**
      * Provides method of injecting user stylesheet document-level styling

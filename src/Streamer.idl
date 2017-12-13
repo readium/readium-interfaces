@@ -174,7 +174,7 @@ interface Metadata {
 interface Link {
     
     string href;
-    string typeLink;
+    string type;
     string[] rel;
     int height;
     int width;
